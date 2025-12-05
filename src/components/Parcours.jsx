@@ -14,12 +14,12 @@ const ParcoursContent = () => {
     };
 
     return (
-        <section className="parcours-section" id="parcours">
-            <div className="container">
+        <section className="parcours-section " id="parcours">
+            <div className="container  ">
                 <h2 className="section-title">Choisis ton Personnage</h2>
                 <p className="section-subtitle">Quel rôle souhaites-tu jouer dans la résistance ?</p>
                 
-                <div className="role-selector">
+                <div className="role-selector bg-">
                     {['eleve', 'enseignant', 'collectivite', 'famille'].map((r) => (
                         <div 
                             key={r}
@@ -49,7 +49,7 @@ const ParcoursContent = () => {
                 </div>
                 
                 {role && (
-                    <div id="game-container" className="mt-12 w-[1500px] p-9 animate-fadeIn">
+                    <div id="game-container" className="mt-12  h-[900px] p-9 animate-fadeIn">
                         <GameContainer />
                     </div>
                 )}

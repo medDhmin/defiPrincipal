@@ -13,7 +13,7 @@ const GameContainer = () => {
   // If no role selected, we shouldn't be here, but just in case
   if (!role) return <div>Veuillez sélectionner un rôle.</div>;
 
-  switch (currentStage) {
+  switch (currentStage) { 
     case 0: return <Map />;
     case 1: return <SalleInformatique />;
     case 2: return <BureauProviseur />;

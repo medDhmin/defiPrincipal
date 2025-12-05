@@ -46,11 +46,11 @@ const CourLycee = () => {
               <GraduationCap size={60} className="absolute -top-4 -right-4 text-white transform rotate-12" />
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold font-fredoka mb-4">
+          <h1 className="text-4xl font-extrabold font-fredoka mb-4">
               MISSION ACCOMPLIE !
           </h1>
           
-          <h2 className="text-2xl md:text-3xl font-bold text-yellow-200 mb-8">
+          <h2 className="text-2xl font-bold text-yellow-200 mb-8">
               Le Lycée est Libre !
           </h2>
 

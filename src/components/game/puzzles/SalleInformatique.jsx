@@ -171,7 +171,7 @@ const SalleInformatique = () => {
           </div>
 
           {/* The PC View */}
-          <div className="w-full lg:w-2/3 relative">
+          <div className="w-full relative">
               <div 
                   className="aspect-video bg-slate-800 rounded-2xl border-8 border-slate-700 relative flex flex-col items-center justify-center cursor-pointer shadow-2xl overflow-hidden group"
                   onClick={handlePcClick}

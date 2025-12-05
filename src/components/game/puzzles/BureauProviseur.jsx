@@ -41,6 +41,7 @@ const BureauProviseur = () => {
   const [selectedFree, setSelectedFree] = useState(null);
   const [matches, setMatches] = useState([]); // Array of matched IDs
   const [feedback, setFeedback] = useState(null); // { type: 'success'|'error', message: '' }
+  const [feedbackAppId, setFeedbackAppId] = useState(null); // ID of the app that should show feedback
 
   const handleProprietaryClick = (app) => {
     if (matches.includes(app.id)) return;
@@ -67,16 +68,23 @@ const BureauProviseur = () => {
         // Match found
         setMatches([...matches, propApp.id, freeApp.id]);
         setFeedback({ type: 'success', message: `Excellent ! ${freeApp.name} est la bonne alternative.` });
+        setFeedbackAppId(freeApp.id);
         setSelectedProprietary(null);
         setSelectedFree(null);
+        setTimeout(() => {
+            setFeedback(null);
+            setFeedbackAppId(null);
+        }, 2000);
     } else {
         // No match
         setFeedback({ type: 'error', message: `Non, ${freeApp.name} ne remplace pas ${propApp.name}. Réessaie !` });
+        setFeedbackAppId(freeApp.id);
         // Reset selection after short delay
         setTimeout(() => {
             setSelectedProprietary(null);
             setSelectedFree(null);
             setFeedback(null);
+            setFeedbackAppId(null);
         }, 1000);
     }
   };
@@ -96,20 +104,14 @@ const BureauProviseur = () => {
           <br/><span className="text-sm text-gray-400">({matches.length / 2} / {proprietaryApps.length} paires trouvées)</span>
       </p>
 
-      {feedback && (
-          <div className={`p-3 rounded-lg text-center mb-6 font-bold animate-pulse sticky top-4 z-50 shadow-md ${feedback.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-              {feedback.message}
-          </div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-8 justify-center items-start flex-grow">
+      <div className="flex flex-row gap-8 justify-center items-start flex-grow">
           
           {/* Proprietary Column */}
           <div className="flex-1 w-full bg-red-50 p-4 rounded-xl border border-red-100">
               <h3 className="text-center font-bold text-red-600 mb-4 text-lg flex items-center justify-center gap-2">
                   <span className="text-2xl">🏢</span> Logiciels Propriétaires
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                   {shuffledProprietary.map(app => {
                       const isMatched = matches.includes(app.id);
                       const isSelected = selectedProprietary?.id === app.id;
@@ -118,7 +120,7 @@ const BureauProviseur = () => {
                               key={app.id}
                               onClick={() => handleProprietaryClick(app)}
                               disabled={isMatched}
-                              className={`w-full p-3 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-all h-28
+                              className={`w-full p-3 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-all h-28 relative
                                   ${isMatched ? 'bg-gray-200 border-gray-300 opacity-40 scale-90' : 
                                     isSelected ? 'bg-white border-red-500 shadow-lg transform scale-105 ring-2 ring-red-200' : 
                                     'bg-white border-red-200 hover:border-red-400 hover:shadow-md'}
@@ -134,7 +136,7 @@ const BureauProviseur = () => {
           </div>
 
           {/* Center Connector (Decoration) */}
-          <div className="hidden md:flex flex-col items-center justify-center self-center text-gray-300">
+          <div className="flex flex-col items-center justify-center self-center text-gray-300">
               <div className="h-full border-l-2 border-dashed border-gray-300 my-4"></div>
               <div className="bg-white p-2 rounded-full border-2 border-gray-200 text-2xl">↔️</div>
               <div className="h-full border-l-2 border-dashed border-gray-300 my-4"></div>
@@ -145,24 +147,30 @@ const BureauProviseur = () => {
               <h3 className="text-center font-bold text-green-600 mb-4 text-lg flex items-center justify-center gap-2">
                   <span className="text-2xl">🐧</span> Alternatives Libres
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                   {shuffledFree.map(app => {
                       const isMatched = matches.includes(app.id);
                       const isSelected = selectedFree?.id === app.id;
+                      const showFeedback = feedbackAppId === app.id && feedback;
                       return (
                           <button
                               key={app.id}
                               onClick={() => handleFreeClick(app)}
                               disabled={isMatched}
-                              className={`w-full p-3 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-all h-28
-                                  ${isMatched ? 'bg-gray-200 border-gray-300 opacity-40 scale-90' : 
-                                    isSelected ? 'bg-white border-green-500 shadow-lg transform scale-105 ring-2 ring-green-200' : 
-                                    'bg-white border-green-200 hover:border-green-400 hover:shadow-md'}
+                              className={`w-full p-3 rounded-lg border-2 flex flex-col items-center justify-center gap-2 transition-all relative
+                                  ${isMatched ? 'bg-gray-200 border-gray-300 opacity-40 scale-90 h-28' : 
+                                    isSelected ? 'bg-white border-green-500 shadow-lg transform scale-105 ring-2 ring-green-200 min-h-[112px]' : 
+                                    'bg-white border-green-200 hover:border-green-400 hover:shadow-md h-28'}
                               `}
                           >
                               <span className="text-3xl filter drop-shadow-sm">{app.icon}</span>
                               <span className="font-semibold text-sm text-center">{app.name}</span>
                               {isMatched && <Check className="text-green-600 absolute top-2 right-2 bg-white rounded-full p-0.5" size={20} />}
+                              {showFeedback && (
+                                  <div className={`absolute -bottom-8 left-0 right-0 p-2 rounded-lg text-xs font-bold text-center animate-pulse z-10 ${feedback.type === 'success' ? 'bg-green-300 text-green-700 border border-green-400' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                                      {feedback.message}
+                                  </div>
+                              )}
                           </button>
                       );
                   })}

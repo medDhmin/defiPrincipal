@@ -135,7 +135,7 @@ const SalleProfs = () => {
                     `}>
                         {teacher.icon}
                     </div>
-                    <p className="font-bold mt-2 text-xs md:text-sm bg-white px-2 py-1 rounded shadow-sm border border-slate-100 whitespace-nowrap z-20">
+                    <p className="font-bold mt-2 text-xs bg-white px-2 py-1 rounded shadow-sm border border-slate-100 whitespace-nowrap z-20">
                         {teacher.name}
                     </p>
                 </div>
@@ -176,7 +176,7 @@ const SalleProfs = () => {
                           )}
                       </div>
                   ) : (
-                      <div className="grid gap-3 md:grid-cols-1">
+                      <div className="grid gap-3">
                           {teachers.find(t => t.id === currentTeacher).options.map((opt, idx) => (
                               <button 
                                   key={idx}

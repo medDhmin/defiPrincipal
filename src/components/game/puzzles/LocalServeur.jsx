@@ -180,7 +180,7 @@ const LocalServeur = () => {
               </div>
 
               {/* Grid */}
-              <div className="grid grid-cols-4 gap-1 w-[320px] h-[320px] sm:w-[400px] sm:h-[400px] bg-slate-800 p-1 rounded-lg">
+              <div className="grid grid-cols-4 gap-1 w-[320px] h-[320px] bg-slate-800 p-1 rounded-lg">
                   {grid.map((tile, idx) => {
                       // Determine if tile is part of the active path (visual polish - advanced feature, skipped for now, simple blue is fine)
                       return (

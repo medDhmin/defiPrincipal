@@ -6,7 +6,7 @@ const Map = () => {
   const { goToStage, completedStages, role } = useGame();
   const containerRef = useRef(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const [showIntro, setShowIntro] = useState(true);
+  const [showIntro, setShowIntro] = useState(completedStages.length === 0);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -22,6 +22,13 @@ const Map = () => {
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  // Prevent intro from auto-showing after first step is completed
+  useEffect(() => {
+    if (completedStages.length > 0 && showIntro) {
+      setShowIntro(false);
+    }
+  }, [completedStages.length]);
 
   const getCoords = (xPercent, yPercent) => {
     return {
@@ -60,13 +67,13 @@ const Map = () => {
   };
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto"> {/* Increased max-width */}
+  <div className="relative w-full mx-auto"> {/* Increased max-width */}
       
       {/* Intro Modal */}
       {showIntro && (
-  <div className="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm rounded-3xl">
+  <div className="absolute inset-0 z-50  flex items-center justify-center bg-slate-900/60 backdrop-blur-sm rounded-3xl ">
     <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-8 border-4 border-blue-500 
-                    flex flex-col  items-center justify-center relative p-8">
+                    flex flex-col  items-center justify-center relative p-8 h-[600px]">
       
       {/* Bouton fermeture - bien positionné sans décaler le contenu */}
       <button
@@ -79,12 +86,12 @@ const Map = () => {
       </button>
 
       {/* Icône info */}
-      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600">
+      <div className=" bg-blue-100 rounded-full flex items-center justify-center mb-6 text-blue-600">
         <Info size={36} />
       </div>
-        <br></br>
         
-      <h3 className="text-2xl md:text-3xl font-bold text-slate-800 mb-4 font-fredoka text-center">
+        
+      <h3 className="text-2xl font-bold text-slate-800 mb-4 font-fredoka text-center">
         Mission : Libérer le Lycée
       </h3>
 
@@ -93,16 +100,14 @@ const Map = () => {
         Votre objectif est de transformer le lycée en un modèle de numérique responsable. 
         Pour cela, vous devez accomplir <strong>5 missions</strong> dans différentes salles.
       </p>
-      <br></br>
-
+ 
       <div className="space-y-4 text-left mb-10 bg-slate-50 p-6 rounded-xl text-base w-full max-w-sm">
         <p className="flex items-center gap-3"><span className="font-bold text-blue-500 text-lg">1.</span> Réparez les PC obsolètes.</p>
         <p className="flex items-center gap-3"><span className="font-bold text-blue-500 text-lg">2.</span> Trouvez des alternatives libres.</p>
         <p className="flex items-center gap-3"><span className="font-bold text-blue-500 text-lg">3.</span> Convainquez l'équipe pédagogique.</p>
         <p className="flex items-center gap-3"><span className="font-bold text-blue-500 text-lg">4.</span> Rétablissez le réseau sécurisé.</p>
       </div>
-      <br></br>
-
+ 
       <button
         onClick={() => setShowIntro(false)}
         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 w-34 h-12 px-10 rounded-full 
@@ -110,14 +115,14 @@ const Map = () => {
       >
         C'est parti !
       </button>
-      <br></br>
-    </div>
+     </div>
   </div>
 )}
-  <div ref={containerRef} className="relative w-full h-[700px] bg-slate-50 rounded-3xl border-8 border-slate-200 shadow-2xl overflow-hidden p-4 select-none">
+ <div className='   w-full   '>
+ <div ref={containerRef} className="relati ve w-full h-[700px] rounded-3xl border-8 border-slate-200 shadow-2xl overflow-hidden p-4 select-none  ">
         
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 bg-white/90 backdrop-blur-sm p-4 border-b border-slate-200 z-20 shadow-sm flex flex-col md:flex-row justify-between items-center px-8 gap-4  ">
+        <div className="absolute   top-0 left-0 right-0   backdrop-blur-sm p-4 border-b border-slate-200 z-20 shadow-sm flex flex-row justify-between items-center px-8 gap-4  ">
             <div>
               <h2 className="text-2xl font-bold text-slate-800 font-fredoka flex items-center gap-2">
                   Plan du Lycée <button onClick={() => setShowIntro(true)} className="text-blue-400 hover:text-blue-600 transition-colors"><Info size={20} /></button>
@@ -137,7 +142,7 @@ const Map = () => {
         </div>
         
         {/* Blueprint Grid Background */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(#000_1px,transparent_1px),linear-gradient(90deg,#000_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[linear-gradient(#000_1px,transparent_1px),linear-gradient(90deg,#000_1px,transparent_1px)] bg-[size:40px_40px] "></div>
 
         {/* Connection Path SVG */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 filter drop-shadow-md">
@@ -243,6 +248,7 @@ const Map = () => {
           }
         `}</style>
       </div>
+ </div>
     </div>
   );
 };
