@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
     --primary-color: #2563eb;
     --secondary-color: #10b981;
@@ -1303,4 +1304,51 @@ section {
     .shield {
         font-size: 3rem;
     }
+}
+
+
+/* Chatbot Theme Utilities */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.glow-primary {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+.glass {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+}
+
+.bg-background {
+    background-color: white;
+}
+
+.bg-primary {
+    background-color: var(--primary-color);
+}
+
+.text-primary-foreground {
+    color: white;
+}
+
+.bg-card {
+    background-color: white;
+}
+
+.text-card-foreground {
+    color: var(--text-primary);
+}
+
+.bg-muted {
+    background-color: var(--light-bg);
+}
+
+.text-muted-foreground {
+    color: var(--text-secondary);
+}
+
+.border-border {
+    border-color: var(--border-color);
 }
