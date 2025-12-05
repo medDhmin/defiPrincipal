@@ -6,6 +6,7 @@ import Simulateur from './components/Simulateur';
 import Guides from './components/Guides';
 import Communaute from './components/Communaute';
 import Footer from './components/Footer';
+import { Chatbot } from './components/Chatbot';
 
 function App() {
   return (
@@ -16,6 +17,11 @@ function App() {
       <Simulateur />
       <Guides />
       <Communaute />
+
+      <Chatbot
+        title="Assistant Démo"
+        greeting="Bonjour ! Je suis la version autonome du chatbot. Comment puis-je vous aider ?"
+      />
       <Footer />
     </>
   );
