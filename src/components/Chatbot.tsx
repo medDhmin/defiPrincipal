@@ -27,8 +27,10 @@ export const Chatbot = ({
     systemPrompt = RAFIQ_SYSTEM_PROMPT
 }: ChatbotProps) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
+    const [knowledgeBase, setKnowledgeBase] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +44,7 @@ export const Chatbot = ({
 
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, isSettingsOpen]);
 
     // Effet d'écriture progressive
     const typeText = async (text: string, tempId: number, speed = 20) => {
@@ -81,6 +83,12 @@ export const Chatbot = ({
             return;
         }
 
+        // Construction du prompt système avec la base de connaissances dynamique
+        let finalSystemPrompt = systemPrompt;
+        if (knowledgeBase.trim()) {
+            finalSystemPrompt += `\n\n============================\nBASE DE CONNAISSANCES DYNAMIQUE (FOURNIE PAR L'UTILISATEUR)\n============================\n${knowledgeBase}\n\nUtilise ces informations pour répondre aux questions spécifiques de l'utilisateur.`;
+        }
+
         try {
             const response = await fetch(OPENROUTER_API_URL, {
                 method: 'POST',
@@ -93,14 +101,14 @@ export const Chatbot = ({
                 body: JSON.stringify({
                     model: 'deepseek/deepseek-chat',
                     messages: [
-                        { role: 'system', content: systemPrompt },
+                        { role: 'system', content: finalSystemPrompt },
                         ...messages.slice(-5).filter(m => !m.id).map((m) => ({
                             role: m.sender === 'user' ? 'user' : 'assistant',
                             content: m.text,
                         })),
                         { role: 'user', content: userMessage },
                     ],
-                    max_tokens: 150,
+                    max_tokens: 300,
                     temperature: 0.5,
                     stream: false,
                 }),
@@ -151,92 +159,127 @@ export const Chatbot = ({
                         exit={{ opacity: 0, y: 20, scale: 0.95 }}
                         className="fixed bottom-24 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]"
                     >
-                        <div className="glass rounded-2xl overflow-hidden shadow-2xl border-2 border-primary/20">
-                            <div className="bg-gradient-primary p-4">
+                        <div className="glass rounded-2xl overflow-hidden shadow-2xl border-2 border-primary/20 flex flex-col h-[500px]">
+                            {/* Header */}
+                            <div className="bg-gradient-primary p-4 flex justify-between items-center shrink-0">
                                 <h3 className="text-white font-bold text-lg">{title}</h3>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                                    className="text-white hover:bg-white/20 p-2 h-auto"
+                                    title="Configurer la base de connaissances"
+                                >
+                                    {isSettingsOpen ? "Retour" : "⚙️ Config"}
+                                </Button>
                             </div>
 
-                            <div
-                                ref={messagesContainerRef}
-                                className="h-96 overflow-y-auto p-4 space-y-4 bg-background/95"
-                            >
-                                {messages.length === 0 && (
-                                    <div className="text-center text-muted-foreground py-8">
-                                        <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                                        <p>{greeting}</p>
+                            {/* Content */}
+                            <div className="flex-1 overflow-hidden relative bg-background/95">
+                                {isSettingsOpen ? (
+                                    <div className="absolute inset-0 p-4 overflow-y-auto">
+                                        <h4 className="font-bold mb-2 text-primary">Base de Connaissances</h4>
+                                        <p className="text-xs text-muted-foreground mb-4">
+                                            Collez ici le texte (FAQ, services, infos) que Rafiq-AI doit apprendre pour répondre aux utilisateurs.
+                                        </p>
+                                        <textarea
+                                            value={knowledgeBase}
+                                            onChange={(e) => setKnowledgeBase(e.target.value)}
+                                            placeholder="Exemple : Les horaires d'ouverture sont de 9h à 18h. Le service support est joignable au..."
+                                            className="w-full h-64 p-3 rounded-lg border border-border bg-muted text-sm focus:ring-2 focus:ring-primary focus:outline-none resize-none"
+                                        />
+                                        <div className="mt-4 flex justify-end">
+                                            <Button onClick={() => setIsSettingsOpen(false)} className="bg-primary text-white">
+                                                Sauvegarder & Retour
+                                            </Button>
+                                        </div>
                                     </div>
-                                )}
-
-                                {messages.map((message, index) => (
-                                    <motion.div
-                                        key={index}
-
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                ) : (
+                                    <div
+                                        ref={messagesContainerRef}
+                                        className="h-full overflow-y-auto p-4 space-y-4"
                                     >
-                                        <div
-                                            className={`max-w-[80%] p-3 rounded-2xl ${message.sender === 'user'
-                                                ? 'bg-primary text-primary-foreground'
-                                                : 'bg-card text-card-foreground border border-border'
-                                                }`}
-                                        >
-                                            {message.sender === 'bot' ? (
-                                                <div className="text-sm prose prose-sm max-w-none">
-                                                    <ReactMarkdown
-                                                        components={{
-                                                            p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                                                            strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                                                            em: ({ children }) => <em className="italic">{children}</em>,
-                                                            ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
-                                                            ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
-                                                            li: ({ children }) => <li>{children}</li>,
-                                                            code: ({ children }) => (
-                                                                <code className="bg-muted px-1 py-0.5 rounded text-xs">
-                                                                    {children}
-                                                                </code>
-                                                            ),
-                                                            pre: ({ children }) => (
-                                                                <pre className="bg-muted p-2 rounded text-xs overflow-x-auto my-2">
-                                                                    {children}
-                                                                </pre>
-                                                            ),
-                                                        }}
-                                                    >
-                                                        {message.text}
-                                                    </ReactMarkdown>
-                                                    {message.id && (
-                                                        <div className="inline-block w-2 h-4 bg-current ml-1 opacity-60 animate-pulse" />
+                                        {messages.length === 0 && (
+                                            <div className="text-center text-muted-foreground py-8">
+                                                <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                                                <p>{greeting}</p>
+                                            </div>
+                                        )}
+
+                                        {messages.map((message, index) => (
+                                            <motion.div
+                                                key={index}
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div
+                                                    className={`max-w-[85%] p-3 rounded-2xl ${message.sender === 'user'
+                                                        ? 'bg-primary text-primary-foreground'
+                                                        : 'bg-card text-card-foreground border border-border shadow-sm'
+                                                        }`}
+                                                >
+                                                    {message.sender === 'bot' ? (
+                                                        <div className="text-sm prose prose-sm max-w-none dark:prose-invert">
+                                                            <ReactMarkdown
+                                                                components={{
+                                                                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                                                                    em: ({ children }) => <em className="italic">{children}</em>,
+                                                                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1">{children}</ul>,
+                                                                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1">{children}</ol>,
+                                                                    li: ({ children }) => <li>{children}</li>,
+                                                                    code: ({ children }) => (
+                                                                        <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">
+                                                                            {children}
+                                                                        </code>
+                                                                    ),
+                                                                    pre: ({ children }) => (
+                                                                        <pre className="bg-muted p-2 rounded text-xs overflow-x-auto my-2 font-mono">
+                                                                            {children}
+                                                                        </pre>
+                                                                    ),
+                                                                }}
+                                                            >
+                                                                {message.text}
+                                                            </ReactMarkdown>
+                                                            {message.id && (
+                                                                <div className="inline-block w-2 h-4 bg-current ml-1 opacity-60 animate-pulse" />
+                                                            )}
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                                                     )}
                                                 </div>
-                                            ) : (
-                                                <p className="text-sm whitespace-pre-wrap">{message.text}</p>
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                ))}
-                                <div ref={messagesEndRef} />
+                                            </motion.div>
+                                        ))}
+                                        <div ref={messagesEndRef} />
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="p-4 border-t border-border bg-background/95">
-                                <div className="flex gap-2">
-                                    <Input
-                                        value={inputValue}
-                                        onChange={(e) => setInputValue(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                                        placeholder={placeholder}
-                                        className="flex-1 bg-background border-border"
-                                    />
-                                    <Button
-                                        onClick={handleSend}
-                                        size="icon"
-                                        className="glow-primary"
-                                        disabled={!inputValue.trim()}
-                                    >
-                                        <Send className="w-4 h-4" />
-                                    </Button>
+                            {/* Footer (Input) - Only show if settings are closed */}
+                            {!isSettingsOpen && (
+                                <div className="p-4 border-t border-border bg-background/95 shrink-0">
+                                    <div className="flex gap-2">
+                                        <Input
+                                            value={inputValue}
+                                            onChange={(e) => setInputValue(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                                            placeholder={placeholder}
+                                            className="flex-1 bg-background border-border"
+                                        />
+                                        <Button
+                                            onClick={handleSend}
+                                            size="icon"
+                                            className="glow-primary shrink-0"
+                                            disabled={!inputValue.trim()}
+                                        >
+                                            <Send className="w-4 h-4" />
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </motion.div>
                 )}
